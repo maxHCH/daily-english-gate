@@ -1,93 +1,96 @@
 # Daily English Gate
 
-Chrome 擴充功能：每天第一次切回 Chrome 視窗時自動開啟 ChatGPT，追蹤實際使用時間，養成每日英語對話習慣。
+**[繁體中文](README.zh-TW.md)**
 
-## 功能
+A Chrome extension that opens ChatGPT automatically on your first daily Chrome focus, tracks your active time, and helps you build a daily English conversation habit.
 
-- 每天第一次切回 Chrome 視窗時自動開啟 ChatGPT
-- 追蹤 ChatGPT 分頁的 **實際 active 時間**（切換到其他分頁自動暫停）
-- 累積 10 分鐘後標記當天完成，跳出完成通知
-- 工具列 badge 即時顯示狀態：
-  - 🔴 `!` — 今日尚未開始
-  - 🔵 `Xm` — 練習中，顯示剩餘分鐘數
-  - 🟢 `N` — 已完成，顯示連續天數
-- 晚上 8 點仍未完成時推播提醒
-- Popup 顯示進度環、連續天數、本週完成次數
+## Features
 
-## 安裝
+- Opens ChatGPT automatically the first time you switch to Chrome each day
+- Tracks **actual active time** on the ChatGPT tab — pauses when you switch away
+- Marks the day complete after 10 cumulative minutes
+- Toolbar badge shows live status:
+  - 🔴 `!` — not started today
+  - 🔵 `Xm` — in progress, minutes remaining
+  - 🟢 `N` — completed, showing current streak
+- Push notification at 8 PM if you haven't finished yet
+- Popup shows a progress ring, streak count, and weekly completions
 
-1. 下載或 clone 本 repo
-2. 前往 `chrome://extensions/`
-3. 開啟右上角**開發人員模式**
-4. 點擊**載入未封裝項目**，選擇本資料夾
+## Installation
 
-## 運作方式
+1. Clone or download this repo
+2. Go to `chrome://extensions/`
+3. Enable **Developer mode** (top-right toggle)
+4. Click **Load unpacked** and select the repo folder
+
+## How It Works
 
 ```
-每天第一次切回 Chrome 視窗
-  └─ 自動開啟 ChatGPT 分頁
+First Chrome focus of the day
+  └─ ChatGPT tab opens automatically
 
-ChatGPT 分頁在前景
-  └─ 每分鐘累積 active 時間（heartbeat alarm）
-  └─ 切換到其他分頁 → 暫停計時
+ChatGPT tab is in the foreground
+  └─ Active time accumulates every minute (heartbeat alarm)
+  └─ Switch to another tab → timer pauses
 
-累積達 10 分鐘
-  └─ 標記今日完成
-  └─ 更新連續天數、本週統計
-  └─ 推播完成通知
+10 minutes accumulated
+  └─ Session marked complete
+  └─ Streak and weekly stats updated
+  └─ Completion notification sent
 
-晚上 8 點（若未完成）
-  └─ 推播提醒通知
+8 PM (if not yet complete)
+  └─ Reminder notification pushed
 ```
 
-**為什麼用 active 時間而非固定計時器？**
+**Why active time instead of a fixed timer?**
 
-固定 10 分鐘計時器在分頁開著就算完成，無法確認你真的在練習。
-Active 時間追蹤確保你必須停留在 ChatGPT 分頁，文字或語音模式皆適用。
+A fixed 10-minute timer completes as long as the tab is open — you could ignore it entirely.
+Active time tracking requires you to actually stay on the ChatGPT tab.
+Works with both text and voice mode since it doesn't depend on detecting input.
 
-## Popup 介面
+## Popup States
 
-| 狀態 | 顯示 |
+| State | Display |
 |---|---|
-| 今日未開始 | 空進度環 + 「立即開始」按鈕 |
-| 練習中（ChatGPT 在前景） | 藍色進度環填滿中 + `ChatGPT 使用中 ▶` |
-| 練習中（ChatGPT 不在前景） | 進度環暫停 + 黃色提示 `切換到 ChatGPT 分頁繼續` |
-| 今日已完成 | 綠色進度環滿 + `✓ 今日練習已完成！` |
+| Not started | Empty ring + **Start Now** button |
+| In progress (ChatGPT active) | Blue ring filling + `ChatGPT in use ▶` |
+| In progress (ChatGPT in background) | Ring paused + yellow `Switch back to ChatGPT to continue` |
+| Completed | Full green ring + `✓ Done for today!` |
 
-## 資料儲存
+## Storage
 
-所有資料儲存於 `chrome.storage.local`，僅在本機，不上傳任何伺服器。
+All data is stored locally via `chrome.storage.local`. Nothing is sent to any server.
 
 ```jsonc
 {
-  "lastSessionDate": "2026-05-11",       // 今日是否已觸發
-  "sessionCompleted": true,              // 今日是否完成
-  "accumulatedActiveSecs": 600,          // 累積 active 秒數
-  "chatGptTabId": 42,                    // 追蹤的分頁 ID
-  "completedDays": { "2026-05-10": true }, // 歷史完成紀錄
-  "streak": 3,                           // 連續天數
-  "weeklyCount": 4                       // 本週完成天數
+  "lastSessionDate": "2026-05-11",         // whether today's session was triggered
+  "sessionCompleted": true,                // whether today is done
+  "accumulatedActiveSecs": 600,            // total active seconds on ChatGPT tab
+  "chatGptTabId": 42,                      // ID of the tracked tab
+  "completedDays": { "2026-05-10": true }, // full completion history
+  "streak": 3,                             // current consecutive-day streak
+  "weeklyCount": 4                         // completions this week (Mon–today)
 }
 ```
 
-## 已知限制
+## Known Limitations
 
-- **無法驗證你真的在對話**：active 時間只代表 ChatGPT 分頁在前景，不代表你在輸入或說話。OpenAI 沒有提供 ChatGPT Web 的使用記錄 API。
-- **語音模式同樣適用**：計時機制與輸入方式無關，文字和語音皆可。
-- **streak 依賴當天完成**：若當天未滿 10 分鐘，streak 不累積。
+- **Cannot verify actual conversation**: active time only means the ChatGPT tab was in the foreground — OpenAI provides no public API for ChatGPT Web usage history.
+- **Voice mode supported**: the timer is input-agnostic, so text and voice both count.
+- **Streak requires daily completion**: if you don't hit 10 minutes on a given day, the streak resets.
 
-## 技術
+## Tech
 
 - Manifest V3
-- 純 JavaScript，無後端、無外部依賴
-- Service Worker + `chrome.alarms`（heartbeat 每分鐘一次，alarm 在 SW 被回收後仍存活）
+- Vanilla JavaScript — no backend, no external dependencies
+- Service Worker + `chrome.alarms` (heartbeat survives SW suspension)
 
-## 權限說明
+## Permissions
 
-| 權限 | 用途 |
+| Permission | Purpose |
 |---|---|
-| `storage` | 儲存練習紀錄、streak、本週統計 |
-| `tabs` | 開啟 ChatGPT 分頁、追蹤 active 分頁 |
-| `alarms` | 每分鐘 heartbeat、晚間提醒排程 |
-| `windows` | 偵測視窗焦點切換以暫停/恢復計時 |
-| `notifications` | 完成通知、晚間提醒推播 |
+| `storage` | Save session records, streak, weekly stats |
+| `tabs` | Open ChatGPT tab, track active tab |
+| `alarms` | Per-minute heartbeat, evening reminder |
+| `windows` | Detect window focus changes to pause/resume timer |
+| `notifications` | Completion alert, evening reminder push |
