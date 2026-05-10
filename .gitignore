@@ -1,0 +1,5 @@
+# Dev tools
+generate_icons.py
+
+# macOS
+.DS_Store
