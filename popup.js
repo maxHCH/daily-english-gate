@@ -1,19 +1,22 @@
-const TOTAL_SECS  = 600; // 10 minutes
 const CIRCUMFERENCE = 2 * Math.PI * 52;
 
 const ringFg      = document.getElementById('ring-fg');
 const timeDisplay = document.getElementById('time-display');
+const targetLabel = document.getElementById('target-label');
 const statusText  = document.getElementById('status-text');
 const streakVal   = document.getElementById('streak-val');
 const weeklyVal   = document.getElementById('weekly-val');
 const startBtn    = document.getElementById('start-btn');
+const calEl       = document.getElementById('calendar');
+const settingsBtn = document.getElementById('settings-btn');
 
 const i18n = (key, ...subs) => chrome.i18n.getMessage(key, subs);
 
-// Apply static translations once on load
+// Static translations
 document.querySelectorAll('[data-i18n]').forEach(el => {
   el.textContent = i18n(el.dataset.i18n);
 });
+startBtn.textContent = i18n('btnStart');
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
@@ -25,22 +28,64 @@ function fmtSecs(s) {
   return `${m}:${String(sec).padStart(2, '0')}`;
 }
 
-// progress 0..1 → fill ring clockwise from empty
 function setRing(progress) {
   ringFg.style.strokeDashoffset = CIRCUMFERENCE * (1 - Math.max(0, Math.min(1, progress)));
 }
 
-function computeActiveSecs(data) {
-  let total = data.accumulatedActiveSecs || 0;
-  if (data.activeStart) total += (Date.now() - data.activeStart) / 1000;
-  return Math.min(total, TOTAL_SECS);
+function computeActiveSecs(data, totalSecs) {
+  let t = data.accumulatedActiveSecs || 0;
+  if (data.activeStart) t += (Date.now() - data.activeStart) / 1000;
+  return Math.min(t, totalSecs);
 }
 
+// ── Calendar ───────────────────────────────────────────────
+
+function renderCalendar(completedDays) {
+  const today       = todayStr();
+  const todayDate   = new Date(today);
+  const dow         = todayDate.getDay();
+  const daysFromMon = dow === 0 ? 6 : dow - 1;
+  const dayLabels   = i18n('calDays').split(',');
+
+  calEl.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const d    = new Date(todayDate);
+    d.setDate(todayDate.getDate() - daysFromMon + i);
+    const dStr   = d.toISOString().slice(0, 10);
+    const isDone = completedDays?.[dStr];
+    const isToday = dStr === today;
+    const isFuture = dStr > today;
+
+    const cell  = document.createElement('div');
+    cell.className = 'cal-day';
+
+    const dot = document.createElement('div');
+    dot.className = 'cal-dot'
+      + (isDone   ? ' done'   : '')
+      + (isToday  ? ' today'  : '')
+      + (isFuture ? ' future' : '');
+
+    const lbl = document.createElement('div');
+    lbl.className = 'cal-label' + (isToday ? ' today' : '');
+    lbl.textContent = dayLabels[i];
+
+    cell.appendChild(dot);
+    cell.appendChild(lbl);
+    calEl.appendChild(cell);
+  }
+}
+
+// ── Render ─────────────────────────────────────────────────
+
 function render(data) {
-  const today = todayStr();
+  const today      = todayStr();
+  const totalSecs  = (data.practiceMins || 10) * 60;
+  const totalMins  = data.practiceMins || 10;
 
   streakVal.textContent = data.streak ?? 0;
   weeklyVal.textContent = `${data.weeklyCount ?? 0}/7`;
+  targetLabel.textContent = i18n('targetLabel', String(totalMins));
+  renderCalendar(data.completedDays);
 
   if (data.lastSessionDate !== today) {
     timeDisplay.textContent = '0:00';
@@ -57,7 +102,7 @@ function render(data) {
   startBtn.classList.add('hidden');
 
   if (data.sessionCompleted) {
-    timeDisplay.textContent = '10:00';
+    timeDisplay.textContent = fmtSecs(totalSecs);
     setRing(1);
     ringFg.classList.add('done');
     statusText.textContent = i18n('statusCompleted');
@@ -65,11 +110,10 @@ function render(data) {
     return;
   }
 
-  // In progress — ring fills as active time accumulates
   ringFg.classList.remove('done');
-  const activeSecs = computeActiveSecs(data);
+  const activeSecs = computeActiveSecs(data, totalSecs);
   timeDisplay.textContent = fmtSecs(activeSecs);
-  setRing(activeSecs / TOTAL_SECS);
+  setRing(activeSecs / totalSecs);
 
   if (data.activeStart) {
     statusText.textContent = i18n('statusInProgress');
@@ -84,12 +128,11 @@ async function refresh() {
   const data = await chrome.storage.local.get([
     'lastSessionDate', 'sessionCompleted',
     'accumulatedActiveSecs', 'activeStart',
-    'streak', 'weeklyCount',
+    'streak', 'weeklyCount', 'completedDays', 'practiceMins',
   ]);
   render(data);
 }
 
-// Live display: poll every second
 setInterval(refresh, 1000);
 refresh();
 
@@ -98,3 +141,5 @@ startBtn.addEventListener('click', () => {
   startBtn.textContent = i18n('btnStarting');
   chrome.runtime.sendMessage({ action: 'startNow' }, () => setTimeout(refresh, 400));
 });
+
+settingsBtn.addEventListener('click', () => chrome.runtime.openOptionsPage());

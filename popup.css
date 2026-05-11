@@ -9,7 +9,15 @@ body {
   background: #0f1923;
   color: #e8eaf0;
   font-family: -apple-system, 'Segoe UI', sans-serif;
-  padding: 20px 16px 16px;
+  padding: 16px 16px 14px;
+}
+
+/* ── Header ── */
+#header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
 }
 
 h1 {
@@ -18,9 +26,20 @@ h1 {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #8892a4;
-  text-align: center;
-  margin-bottom: 18px;
 }
+
+#settings-btn {
+  background: none;
+  border: none;
+  color: #3a4a5d;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: color 0.15s;
+  line-height: 1;
+}
+#settings-btn:hover { color: #8892a4; }
 
 /* ── Timer ring ── */
 #timer-section {
@@ -28,13 +47,6 @@ h1 {
   width: 120px;
   height: 120px;
   margin: 0 auto 6px;
-}
-
-#target-label {
-  text-align: center;
-  font-size: 11px;
-  color: #3a4a5d;
-  margin-bottom: 10px;
 }
 
 .timer-ring {
@@ -54,15 +66,12 @@ h1 {
   stroke: #3b82f6;
   stroke-width: 8;
   stroke-linecap: round;
-  /* circumference ≈ 326.7 */
   stroke-dasharray: 326.7;
-  stroke-dashoffset: 0;
+  stroke-dashoffset: 326.7;
   transition: stroke-dashoffset 1s linear, stroke 0.4s;
 }
 
-.ring-fg.done {
-  stroke: #22c55e;
-}
+.ring-fg.done { stroke: #22c55e; }
 
 #time-display {
   position: absolute;
@@ -75,13 +84,20 @@ h1 {
   color: #e8eaf0;
 }
 
+#target-label {
+  text-align: center;
+  font-size: 11px;
+  color: #3a4a5d;
+  margin-bottom: 8px;
+}
+
 /* ── Status ── */
 #status-text {
   text-align: center;
   font-size: 13px;
   color: #8892a4;
   min-height: 18px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 #status-text.active  { color: #60a5fa; }
@@ -93,17 +109,13 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0;
   background: #1a2533;
   border-radius: 10px;
-  padding: 12px 0;
-  margin-bottom: 14px;
+  padding: 10px 0;
+  margin-bottom: 12px;
 }
 
-.stat {
-  flex: 1;
-  text-align: center;
-}
+.stat { flex: 1; text-align: center; }
 
 .stat-value {
   font-size: 22px;
@@ -125,6 +137,54 @@ h1 {
   background: #2a3a4d;
 }
 
+/* ── Calendar ── */
+#calendar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.cal-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.cal-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #1a2533;
+  border: 2px solid #2a3a4d;
+}
+
+.cal-dot.done {
+  background: #22c55e;
+  border-color: #22c55e;
+}
+
+.cal-dot.today {
+  background: transparent;
+  border-color: #3b82f6;
+  box-shadow: 0 0 4px #3b82f644;
+}
+
+.cal-dot.future {
+  background: #0f1923;
+  border-color: #1a2533;
+  opacity: 0.35;
+}
+
+.cal-label {
+  font-size: 9px;
+  color: #3a4a5d;
+  letter-spacing: 0.02em;
+}
+
+.cal-label.today { color: #60a5fa; }
+
 /* ── Button ── */
 #start-btn {
   display: block;
@@ -140,6 +200,6 @@ h1 {
   transition: background 0.2s;
 }
 
-#start-btn:hover { background: #2563eb; }
+#start-btn:hover  { background: #2563eb; }
 #start-btn:active { background: #1d4ed8; }
 #start-btn.hidden { display: none; }

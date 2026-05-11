@@ -4,7 +4,9 @@
       "Bash(python3 -c \"from PIL import Image, ImageDraw, ImageFont; print\\('pillow ok'\\)\")",
       "Bash(python3 *)",
       "Bash(git -C /Users/max_hsieh/daily-english-gate add README.md)",
-      "Bash(git -C /Users/max_hsieh/daily-english-gate commit -m ' *)"
+      "Bash(git -C /Users/max_hsieh/daily-english-gate commit -m ' *)",
+      "Bash(git -C /Users/max_hsieh/daily-english-gate add -A)",
+      "Bash(git -C /Users/max_hsieh/daily-english-gate push)"
     ]
   }
 }

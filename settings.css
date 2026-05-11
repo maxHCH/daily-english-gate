@@ -1,0 +1,105 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #0f1923;
+  color: #e8eaf0;
+  font-family: -apple-system, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 48px 16px;
+}
+
+#app {
+  width: 100%;
+  max-width: 420px;
+}
+
+h1 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8892a4;
+  margin-bottom: 6px;
+}
+
+h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #e8eaf0;
+  margin-bottom: 36px;
+}
+
+section {
+  background: #1a2533;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.section-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8892a4;
+  margin-bottom: 14px;
+}
+
+/* ── Segmented buttons ── */
+.seg-group {
+  display: flex;
+  gap: 8px;
+}
+
+.seg-btn {
+  flex: 1;
+  padding: 10px 0;
+  background: #0f1923;
+  color: #8892a4;
+  border: 2px solid #2a3a4d;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.seg-btn:hover { border-color: #3b82f6; color: #e8eaf0; }
+
+.seg-btn.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #fff;
+}
+
+/* ── Time input ── */
+input[type="time"] {
+  width: 100%;
+  padding: 10px 14px;
+  background: #0f1923;
+  color: #e8eaf0;
+  border: 2px solid #2a3a4d;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.15s;
+  color-scheme: dark;
+}
+
+input[type="time"]:focus { border-color: #3b82f6; }
+
+/* ── Saved feedback ── */
+#saved-msg {
+  text-align: center;
+  color: #22c55e;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 8px;
+  transition: opacity 0.3s;
+}
+
+#saved-msg.hidden { opacity: 0; }

@@ -1,9 +1,9 @@
 {
   "appName":            { "message": "Daily English Gate" },
-  "appDescription":     { "message": "每天開 Chrome 自動開啟 ChatGPT，累積 10 分鐘英語練習" },
+  "appDescription":     { "message": "每天開 Chrome 自動開啟 ChatGPT，累積英語練習時間" },
   "labelStreak":        { "message": "連續天數" },
   "labelWeekly":        { "message": "本週完成" },
-  "targetLabel":        { "message": "/ 10:00 目標" },
+  "targetLabel":        { "message": "/ $MINS$ 分鐘目標", "placeholders": { "mins": { "content": "$1" } } },
   "btnStart":           { "message": "立即開始" },
   "btnStarting":        { "message": "開啟中..." },
   "statusNotStarted":   { "message": "今日尚未開始練習" },
@@ -19,5 +19,11 @@
   "notifReminderMsg": {
     "message": "連續 $DAYS$ 天的紀錄快斷掉了 😢",
     "placeholders": { "days": { "content": "$1" } }
-  }
+  },
+  "calDays":            { "message": "一,二,三,四,五,六,日" },
+  "settingsTitle":      { "message": "設定" },
+  "settingsDuration":   { "message": "練習時長" },
+  "settingsReminder":   { "message": "每日提醒時間" },
+  "settingsSaved":      { "message": "已儲存 ✓" },
+  "settingsOpen":       { "message": "設定" }
 }

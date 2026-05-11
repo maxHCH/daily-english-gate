@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+  <meta charset="utf-8">
+  <title>Daily English Gate — Settings</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div id="app">
+    <h1>Daily English Gate</h1>
+    <h2 data-i18n="settingsTitle"></h2>
+
+    <section>
+      <label class="section-label" data-i18n="settingsDuration"></label>
+      <div id="duration-options" class="seg-group">
+        <button class="seg-btn" data-value="5">5</button>
+        <button class="seg-btn" data-value="10">10</button>
+        <button class="seg-btn" data-value="15">15</button>
+        <button class="seg-btn" data-value="20">20</button>
+      </div>
+    </section>
+
+    <section>
+      <label class="section-label" for="reminder-time" data-i18n="settingsReminder"></label>
+      <input type="time" id="reminder-time" value="20:00">
+    </section>
+
+    <div id="saved-msg" class="hidden" data-i18n="settingsSaved"></div>
+  </div>
+  <script src="settings.js"></script>
+</body>
+</html>

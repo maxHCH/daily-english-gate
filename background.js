@@ -1,5 +1,4 @@
-const CHATGPT_URL = 'https://chatgpt.com';
-const REQUIRED_ACTIVE_SECS = 600; // 10 minutes of active ChatGPT tab time
+const CHATGPT_URL    = 'https://chatgpt.com';
 const ALARM_HEARTBEAT = 'heartbeat';
 const ALARM_REMINDER  = 'evening-reminder';
 
@@ -7,12 +6,20 @@ function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
 
+async function getSettings() {
+  const data = await chrome.storage.local.get({ practiceMins: 10, reminderTime: '20:00' });
+  return { requiredSecs: data.practiceMins * 60, reminderTime: data.reminderTime };
+}
+
 // ── Badge ──────────────────────────────────────────────────
 
 async function updateBadge() {
-  const data = await chrome.storage.local.get([
-    'lastSessionDate', 'sessionCompleted',
-    'accumulatedActiveSecs', 'activeStart', 'streak',
+  const [data, { requiredSecs }] = await Promise.all([
+    chrome.storage.local.get([
+      'lastSessionDate', 'sessionCompleted',
+      'accumulatedActiveSecs', 'activeStart', 'streak',
+    ]),
+    getSettings(),
   ]);
   const today = todayStr();
 
@@ -20,8 +27,8 @@ async function updateBadge() {
     chrome.action.setBadgeBackgroundColor({ color: '#22c55e' });
     chrome.action.setBadgeText({ text: String(data.streak || 1) });
   } else if (data.lastSessionDate === today) {
-    const secs = computeActiveSecs(data);
-    const minsLeft = Math.ceil((REQUIRED_ACTIVE_SECS - secs) / 60);
+    const secs     = computeActiveSecs(data, requiredSecs);
+    const minsLeft = Math.ceil((requiredSecs - secs) / 60);
     chrome.action.setBadgeBackgroundColor({ color: '#3b82f6' });
     chrome.action.setBadgeText({ text: `${minsLeft}m` });
   } else {
@@ -30,17 +37,16 @@ async function updateBadge() {
   }
 }
 
-function computeActiveSecs(data) {
+function computeActiveSecs(data, cap) {
   let total = data.accumulatedActiveSecs || 0;
   if (data.activeStart) total += (Date.now() - data.activeStart) / 1000;
-  return Math.min(total, REQUIRED_ACTIVE_SECS);
+  return Math.min(total, cap);
 }
 
 // ── Session start ──────────────────────────────────────────
 
 async function startSession() {
   const today = todayStr();
-  // Write date first to prevent race between onStartup + onFocusChanged
   const { lastSessionDate } = await chrome.storage.local.get('lastSessionDate');
   if (lastSessionDate === today) return;
   await chrome.storage.local.set({ lastSessionDate: today });
@@ -50,7 +56,7 @@ async function startSession() {
     sessionCompleted: false,
     chatGptTabId: tab.id,
     accumulatedActiveSecs: 0,
-    activeStart: Date.now(), // newly created tab is immediately active
+    activeStart: Date.now(),
   });
 
   chrome.alarms.create(ALARM_HEARTBEAT, { periodInMinutes: 1 });
@@ -79,17 +85,20 @@ async function completeSession(data) {
 // ── Active-time tracking ───────────────────────────────────
 
 async function onActiveTabChanged(tabId) {
-  const data = await chrome.storage.local.get([
-    'lastSessionDate', 'sessionCompleted', 'chatGptTabId',
-    'accumulatedActiveSecs', 'activeStart',
+  const [data, { requiredSecs }] = await Promise.all([
+    chrome.storage.local.get([
+      'lastSessionDate', 'sessionCompleted', 'chatGptTabId',
+      'accumulatedActiveSecs', 'activeStart',
+    ]),
+    getSettings(),
   ]);
   const today = todayStr();
   if (data.lastSessionDate !== today || data.sessionCompleted) return;
 
-  const now = Date.now();
-  let accumulated = data.accumulatedActiveSecs || 0;
+  const now         = Date.now();
+  let accumulated   = data.accumulatedActiveSecs || 0;
   if (data.activeStart) accumulated += (now - data.activeStart) / 1000;
-  accumulated = Math.min(accumulated, REQUIRED_ACTIVE_SECS);
+  accumulated = Math.min(accumulated, requiredSecs);
 
   const isGpt = tabId === data.chatGptTabId;
   await chrome.storage.local.set({
@@ -97,7 +106,7 @@ async function onActiveTabChanged(tabId) {
     activeStart: isGpt ? now : null,
   });
 
-  if (accumulated >= REQUIRED_ACTIVE_SECS) {
+  if (accumulated >= requiredSecs) {
     await completeSession({ ...data, accumulatedActiveSecs: accumulated });
     return;
   }
@@ -111,9 +120,10 @@ async function pauseTracking() {
   const today = todayStr();
   if (data.lastSessionDate !== today || data.sessionCompleted || !data.activeStart) return;
 
+  const { requiredSecs } = await getSettings();
   const accumulated = Math.min(
     (data.accumulatedActiveSecs || 0) + (Date.now() - data.activeStart) / 1000,
-    REQUIRED_ACTIVE_SECS,
+    requiredSecs,
   );
   await chrome.storage.local.set({ accumulatedActiveSecs: Math.floor(accumulated), activeStart: null });
   updateBadge();
@@ -145,13 +155,37 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
   await chrome.storage.local.set({ chatGptTabId: null });
 });
 
+// Reschedule reminder and re-check completion when settings change
+chrome.storage.onChanged.addListener(async (changes) => {
+  if (changes.reminderTime) {
+    await scheduleEveningReminder();
+  }
+  if (changes.practiceMins) {
+    const requiredSecs = (changes.practiceMins.newValue || 10) * 60;
+    const data = await chrome.storage.local.get([
+      'lastSessionDate', 'sessionCompleted', 'accumulatedActiveSecs', 'activeStart',
+    ]);
+    if (data.lastSessionDate === todayStr() && !data.sessionCompleted) {
+      const secs = computeActiveSecs(data, requiredSecs);
+      if (secs >= requiredSecs) {
+        await completeSession(data);
+        return;
+      }
+    }
+    updateBadge();
+  }
+});
+
 // ── Alarms ─────────────────────────────────────────────────
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === ALARM_HEARTBEAT) {
-    const data = await chrome.storage.local.get([
-      'lastSessionDate', 'sessionCompleted', 'chatGptTabId',
-      'accumulatedActiveSecs', 'activeStart',
+    const [data, { requiredSecs }] = await Promise.all([
+      chrome.storage.local.get([
+        'lastSessionDate', 'sessionCompleted', 'chatGptTabId',
+        'accumulatedActiveSecs', 'activeStart',
+      ]),
+      getSettings(),
     ]);
     const today = todayStr();
     if (data.lastSessionDate !== today || data.sessionCompleted) {
@@ -160,20 +194,19 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     }
     if (data.chatGptTabId && data.activeStart) {
       try {
-        const tab = await chrome.tabs.get(data.chatGptTabId);
-        // Only accumulate if ChatGPT tab is the active tab in a focused window
+        const tab   = await chrome.tabs.get(data.chatGptTabId);
         const [win] = await chrome.windows.query({ focused: true });
         if (tab.active && win && tab.windowId === win.id) {
-          const now = Date.now();
+          const now         = Date.now();
           const accumulated = Math.min(
             (data.accumulatedActiveSecs || 0) + (now - data.activeStart) / 1000,
-            REQUIRED_ACTIVE_SECS,
+            requiredSecs,
           );
           await chrome.storage.local.set({
             accumulatedActiveSecs: Math.floor(accumulated),
             activeStart: now,
           });
-          if (accumulated >= REQUIRED_ACTIVE_SECS) {
+          if (accumulated >= requiredSecs) {
             await completeSession({ ...data, accumulatedActiveSecs: accumulated });
             return;
           }
@@ -197,13 +230,17 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   }
 });
 
-// ── Evening reminder setup ─────────────────────────────────
+// ── Evening reminder ───────────────────────────────────────
 
-function scheduleEveningReminder() {
+async function scheduleEveningReminder() {
+  const { reminderTime } = await chrome.storage.local.get({ reminderTime: '20:00' });
+  const [hour, min] = reminderTime.split(':').map(Number);
+
   const now  = new Date();
   const next = new Date(now);
-  next.setHours(20, 0, 0, 0);
+  next.setHours(hour, min, 0, 0);
   if (next <= now) next.setDate(next.getDate() + 1);
+
   chrome.alarms.create(ALARM_REMINDER, {
     when: next.getTime(),
     periodInMinutes: 24 * 60,
@@ -233,19 +270,29 @@ async function recalcStats(today, prevData) {
   const days = completedDays || {};
   days[today] = true;
 
+  // Streak
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
-  const yStr = yesterday.toISOString().slice(0, 10);
+  const yStr  = yesterday.toISOString().slice(0, 10);
   const streak = days[yStr] ? (prevData.streak || 0) + 1 : 1;
 
-  const todayDate  = new Date(today);
-  const dow        = todayDate.getDay();
+  // Weekly count
+  const todayDate   = new Date(today);
+  const dow         = todayDate.getDay();
   const daysFromMon = dow === 0 ? 6 : dow - 1;
-  let weeklyCount  = 0;
+  let weeklyCount   = 0;
   for (let i = 0; i <= daysFromMon; i++) {
     const d = new Date(todayDate);
     d.setDate(todayDate.getDate() - i);
     if (days[d.toISOString().slice(0, 10)]) weeklyCount++;
+  }
+
+  // Prune entries older than 90 days
+  const cutoff = new Date(today);
+  cutoff.setDate(cutoff.getDate() - 90);
+  const cutoffStr = cutoff.toISOString().slice(0, 10);
+  for (const key of Object.keys(days)) {
+    if (key < cutoffStr) delete days[key];
   }
 
   await chrome.storage.local.set({ completedDays: days, streak, weeklyCount });

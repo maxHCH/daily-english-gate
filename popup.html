@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="">
 <head>
   <meta charset="utf-8">
   <title>Daily English Gate</title>
@@ -7,7 +7,10 @@
 </head>
 <body>
   <div id="app">
-    <h1>Daily English Gate</h1>
+    <div id="header">
+      <h1>Daily English Gate</h1>
+      <button id="settings-btn" title="Settings">⚙</button>
+    </div>
 
     <div id="timer-section">
       <svg class="timer-ring" viewBox="0 0 120 120">
@@ -16,9 +19,9 @@
       </svg>
       <div id="time-display">--:--</div>
     </div>
-    <div id="target-label" data-i18n="targetLabel"></div>
+    <div id="target-label"></div>
 
-    <div id="status-text">載入中...</div>
+    <div id="status-text"></div>
 
     <div id="stats">
       <div class="stat">
@@ -32,7 +35,9 @@
       </div>
     </div>
 
-    <button id="start-btn" class="hidden">立即開始</button>
+    <div id="calendar"></div>
+
+    <button id="start-btn" class="hidden"></button>
   </div>
   <script src="popup.js"></script>
 </body>
