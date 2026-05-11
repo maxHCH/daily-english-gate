@@ -35,5 +35,8 @@
   "notifFreezeMsg": {
     "message": "昨天沒練習，凍結保護了你的 $STREAK$ 天紀錄",
     "placeholders": { "streak": { "content": "$1" } }
-  }
+  },
+  "notifPromptTitle": { "message": "該練英文了！" },
+  "notifPromptMsg":   { "message": "今天還沒開始，點這裡立刻開始練習" },
+  "notifPromptBtn":   { "message": "開始練習" }
 }

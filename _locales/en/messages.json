@@ -35,5 +35,8 @@
   "notifFreezeMsg": {
     "message": "You missed yesterday — freeze protected your $STREAK$-day streak",
     "placeholders": { "streak": { "content": "$1" } }
-  }
+  },
+  "notifPromptTitle": { "message": "Time to practice English!" },
+  "notifPromptMsg":   { "message": "You haven't started today — tap to begin" },
+  "notifPromptBtn":   { "message": "Start Practice" }
 }

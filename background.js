@@ -57,13 +57,35 @@ function computeActiveSecs(data, cap) {
   return Math.min(total, cap);
 }
 
-// ── Session start ──────────────────────────────────────────
+// ── Daily prompt notification ──────────────────────────────
 
-async function startSession() {
+async function showDailyPrompt() {
+  const today = todayStr();
+  const data  = await chrome.storage.local.get(['lastSessionDate', 'promptShownDate']);
+  if (data.lastSessionDate === today) return;   // already started
+  if (data.promptShownDate === today) return;   // already shown today
+
+  await chrome.storage.local.set({ promptShownDate: today });
+  chrome.notifications.create('daily-prompt', {
+    type: 'basic',
+    iconUrl: 'icons/icon128.png',
+    title: chrome.i18n.getMessage('notifPromptTitle'),
+    message: chrome.i18n.getMessage('notifPromptMsg'),
+    buttons: [{ title: chrome.i18n.getMessage('notifPromptBtn') }],
+    requireInteraction: true,
+    priority: 2,
+  });
+}
+
+// ── Begin session (called when user clicks notification or popup btn) ──
+
+async function beginSession() {
   const today = todayStr();
   const { lastSessionDate } = await chrome.storage.local.get('lastSessionDate');
   if (lastSessionDate === today) return;
   await chrome.storage.local.set({ lastSessionDate: today });
+
+  chrome.notifications.clear('daily-prompt');
 
   // Reuse existing ChatGPT tab if one is already open
   const existing = await chrome.tabs.query({ url: 'https://chatgpt.com/*' });
@@ -157,7 +179,7 @@ async function pauseTracking() {
 
 chrome.runtime.onStartup.addListener(async () => {
   scheduleEveningReminder();
-  await startSession();
+  await showDailyPrompt();
 });
 
 chrome.windows.onFocusChanged.addListener(async (windowId) => {
@@ -165,7 +187,7 @@ chrome.windows.onFocusChanged.addListener(async (windowId) => {
     await pauseTracking();
     return;
   }
-  await startSession();
+  await showDailyPrompt();
   const [tab] = await chrome.tabs.query({ active: true, windowId });
   if (tab) await onActiveTabChanged(tab.id);
 });
@@ -276,12 +298,22 @@ chrome.runtime.onInstalled.addListener(() => {
   updateBadge();
 });
 
+// ── Notification clicks ────────────────────────────────────
+
+chrome.notifications.onClicked.addListener((id) => {
+  if (id === 'daily-prompt') beginSession();
+});
+
+chrome.notifications.onButtonClicked.addListener((id) => {
+  if (id === 'daily-prompt') beginSession();
+});
+
 // ── Popup messages ─────────────────────────────────────────
 
 chrome.runtime.onMessage.addListener((msg, _sender, respond) => {
   if (msg.action === 'startNow') {
     chrome.storage.local.remove('lastSessionDate', () => {
-      startSession().then(() => respond({ ok: true }));
+      beginSession().then(() => respond({ ok: true }));
     });
     return true;
   }
