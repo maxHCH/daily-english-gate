@@ -26,5 +26,14 @@
   "settingsReminder":   { "message": "每日提醒時間" },
   "settingsSaved":      { "message": "已儲存 ✓" },
   "settingsOpen":           { "message": "設定" },
-  "settingsDurationUnit":   { "message": "分鐘（1–60）" }
+  "settingsDurationUnit":   { "message": "分鐘（1–60）" },
+  "settingsStreakFreeze":    { "message": "Streak 凍結" },
+  "settingsFreezeDesc":     { "message": "每週可跳過一天不斷 streak" },
+  "freezeAvailable":        { "message": "🧊 本週凍結可用" },
+  "freezeUsed":             { "message": "❄️ 本週凍結已使用" },
+  "notifFreezeTitle":       { "message": "Streak 凍結啟動！" },
+  "notifFreezeMsg": {
+    "message": "昨天沒練習，凍結保護了你的 $STREAK$ 天紀錄",
+    "placeholders": { "streak": { "content": "$1" } }
+  }
 }

@@ -7,8 +7,16 @@ const statusText  = document.getElementById('status-text');
 const streakVal   = document.getElementById('streak-val');
 const weeklyVal   = document.getElementById('weekly-val');
 const startBtn    = document.getElementById('start-btn');
-const calEl       = document.getElementById('calendar');
-const settingsBtn = document.getElementById('settings-btn');
+const calEl        = document.getElementById('calendar');
+const freezeEl     = document.getElementById('freeze-indicator');
+const settingsBtn  = document.getElementById('settings-btn');
+
+function weekKey(dateStr) {
+  const d = new Date(dateStr);
+  const day = d.getDay() || 7;
+  d.setDate(d.getDate() - day + 1);
+  return d.toISOString().slice(0, 10);
+}
 
 const i18n = (key, ...subs) => chrome.i18n.getMessage(key, subs);
 
@@ -75,6 +83,22 @@ function renderCalendar(completedDays) {
   }
 }
 
+// ── Freeze indicator ───────────────────────────────────────
+
+function renderFreeze(data) {
+  const enabled = data.streakFreezeEnabled !== false; // default true
+  const streak  = data.streak || 0;
+
+  if (!enabled || streak === 0) {
+    freezeEl.className = 'hidden';
+    return;
+  }
+
+  const used = data.freezeUsedWeek === weekKey(todayStr());
+  freezeEl.textContent = i18n(used ? 'freezeUsed' : 'freezeAvailable');
+  freezeEl.className   = used ? 'freeze-used' : 'freeze-available';
+}
+
 // ── Render ─────────────────────────────────────────────────
 
 function render(data) {
@@ -86,6 +110,7 @@ function render(data) {
   weeklyVal.textContent = `${data.weeklyCount ?? 0}/7`;
   targetLabel.textContent = i18n('targetLabel', String(totalMins));
   renderCalendar(data.completedDays);
+  renderFreeze(data);
 
   if (data.lastSessionDate !== today) {
     timeDisplay.textContent = '0:00';
@@ -129,6 +154,7 @@ async function refresh() {
     'lastSessionDate', 'sessionCompleted',
     'accumulatedActiveSecs', 'activeStart',
     'streak', 'weeklyCount', 'completedDays', 'practiceMins',
+    'streakFreezeEnabled', 'freezeUsedWeek',
   ]);
   render(data);
 }

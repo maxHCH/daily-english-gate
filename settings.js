@@ -7,6 +7,7 @@ document.title = `Daily English Gate — ${i18n('settingsTitle')}`;
 
 const durationInput = document.getElementById('duration-input');
 const reminderInput = document.getElementById('reminder-time');
+const freezeToggle  = document.getElementById('freeze-toggle');
 const savedMsg      = document.getElementById('saved-msg');
 
 let saveTimer = null;
@@ -18,9 +19,10 @@ function showSaved() {
 }
 
 // Load saved settings
-chrome.storage.local.get({ practiceMins: 10, reminderTime: '20:00' }, (data) => {
-  durationInput.value = data.practiceMins;
-  reminderInput.value = data.reminderTime;
+chrome.storage.local.get({ practiceMins: 10, reminderTime: '20:00', streakFreezeEnabled: true }, (data) => {
+  durationInput.value    = data.practiceMins;
+  reminderInput.value    = data.reminderTime;
+  freezeToggle.checked   = data.streakFreezeEnabled;
 });
 
 // Duration: validate and save on change
@@ -41,4 +43,9 @@ durationInput.addEventListener('input', () => {
 // Reminder time
 reminderInput.addEventListener('change', () => {
   chrome.storage.local.set({ reminderTime: reminderInput.value }, showSaved);
+});
+
+// Streak freeze toggle
+freezeToggle.addEventListener('change', () => {
+  chrome.storage.local.set({ streakFreezeEnabled: freezeToggle.checked }, showSaved);
 });

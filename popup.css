@@ -185,6 +185,17 @@ h1 {
 
 .cal-label.today { color: #60a5fa; }
 
+/* ── Freeze indicator ── */
+#freeze-indicator {
+  text-align: center;
+  font-size: 11px;
+  margin-bottom: 10px;
+}
+
+#freeze-indicator.hidden       { display: none; }
+#freeze-indicator.freeze-available { color: #60a5fa; }
+#freeze-indicator.freeze-used      { color: #3a4a5d; }
+
 /* ── Button ── */
 #start-btn {
   display: block;

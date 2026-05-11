@@ -6,9 +6,23 @@ function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
 
+// Returns the Monday of the week containing dateStr (used as freeze week key)
+function weekKey(dateStr) {
+  const d   = new Date(dateStr);
+  const day = d.getDay() || 7;
+  d.setDate(d.getDate() - day + 1);
+  return d.toISOString().slice(0, 10);
+}
+
 async function getSettings() {
-  const data = await chrome.storage.local.get({ practiceMins: 10, reminderTime: '20:00' });
-  return { requiredSecs: data.practiceMins * 60, reminderTime: data.reminderTime };
+  const data = await chrome.storage.local.get({
+    practiceMins: 10, reminderTime: '20:00', streakFreezeEnabled: true,
+  });
+  return {
+    requiredSecs: data.practiceMins * 60,
+    reminderTime: data.reminderTime,
+    streakFreezeEnabled: data.streakFreezeEnabled,
+  };
 }
 
 // ── Badge ──────────────────────────────────────────────────
@@ -51,7 +65,17 @@ async function startSession() {
   if (lastSessionDate === today) return;
   await chrome.storage.local.set({ lastSessionDate: today });
 
-  const tab = await chrome.tabs.create({ url: CHATGPT_URL, active: true });
+  // Reuse existing ChatGPT tab if one is already open
+  const existing = await chrome.tabs.query({ url: 'https://chatgpt.com/*' });
+  let tab;
+  if (existing.length > 0) {
+    tab = existing[0];
+    await chrome.tabs.update(tab.id, { active: true });
+    await chrome.windows.update(tab.windowId, { focused: true });
+  } else {
+    tab = await chrome.tabs.create({ url: CHATGPT_URL, active: true });
+  }
+
   await chrome.storage.local.set({
     sessionCompleted: false,
     chatGptTabId: tab.id,
@@ -270,11 +294,34 @@ async function recalcStats(today, prevData) {
   const days = completedDays || {};
   days[today] = true;
 
-  // Streak
+  // Streak (with optional freeze)
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
-  const yStr  = yesterday.toISOString().slice(0, 10);
-  const streak = days[yStr] ? (prevData.streak || 0) + 1 : 1;
+  const yStr      = yesterday.toISOString().slice(0, 10);
+  const prevStreak = prevData.streak || 0;
+  let streak;
+
+  if (days[yStr]) {
+    streak = prevStreak + 1;
+  } else if (prevStreak > 0) {
+    const { streakFreezeEnabled = true, freezeUsedWeek } =
+      await chrome.storage.local.get({ streakFreezeEnabled: true, freezeUsedWeek: null });
+    const thisWeek = weekKey(today);
+    if (streakFreezeEnabled && freezeUsedWeek !== thisWeek) {
+      streak = prevStreak; // freeze consumed — keep streak
+      await chrome.storage.local.set({ freezeUsedWeek: thisWeek });
+      chrome.notifications.create('freeze', {
+        type: 'basic',
+        iconUrl: 'icons/icon48.png',
+        title: chrome.i18n.getMessage('notifFreezeTitle'),
+        message: chrome.i18n.getMessage('notifFreezeMsg', String(prevStreak)),
+      });
+    } else {
+      streak = 1;
+    }
+  } else {
+    streak = 1;
+  }
 
   // Weekly count
   const todayDate   = new Date(today);

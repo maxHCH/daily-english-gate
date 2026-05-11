@@ -26,5 +26,14 @@
   "settingsReminder":   { "message": "Daily Reminder" },
   "settingsSaved":      { "message": "Saved ✓" },
   "settingsOpen":           { "message": "Settings" },
-  "settingsDurationUnit":   { "message": "min (1–60)" }
+  "settingsDurationUnit":   { "message": "min (1–60)" },
+  "settingsStreakFreeze":    { "message": "Streak Freeze" },
+  "settingsFreezeDesc":     { "message": "Skip one day per week without breaking your streak" },
+  "freezeAvailable":        { "message": "🧊 Freeze available this week" },
+  "freezeUsed":             { "message": "❄️ Freeze used this week" },
+  "notifFreezeTitle":       { "message": "Streak Freeze Activated!" },
+  "notifFreezeMsg": {
+    "message": "You missed yesterday — freeze protected your $STREAK$-day streak",
+    "placeholders": { "streak": { "content": "$1" } }
+  }
 }
