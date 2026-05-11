@@ -38,5 +38,9 @@
   },
   "notifPromptTitle": { "message": "Time to practice English!" },
   "notifPromptMsg":   { "message": "You haven't started today — tap to begin" },
-  "notifPromptBtn":   { "message": "Start Practice" }
+  "notifPromptBtn":   { "message": "Start Practice" },
+  "settingsPrompt":        { "message": "Opening Prompt" },
+  "settingsPromptHint":    { "message": "Auto-filled into ChatGPT when the session starts (via ?q= URL param)" },
+  "settingsTopics":        { "message": "Daily Topic Rotation" },
+  "settingsTopicsDesc":    { "message": "Append a different practice topic to the prompt each day" }
 }

@@ -38,5 +38,9 @@
   },
   "notifPromptTitle": { "message": "該練英文了！" },
   "notifPromptMsg":   { "message": "今天還沒開始，點這裡立刻開始練習" },
-  "notifPromptBtn":   { "message": "開始練習" }
+  "notifPromptBtn":   { "message": "開始練習" },
+  "settingsPrompt":        { "message": "開場 Prompt" },
+  "settingsPromptHint":    { "message": "開啟 ChatGPT 時自動帶入對話框（URL ?q= 參數）" },
+  "settingsTopics":        { "message": "每日主題輪換" },
+  "settingsTopicsDesc":    { "message": "每天自動在 prompt 末尾附加一個練習主題" }
 }

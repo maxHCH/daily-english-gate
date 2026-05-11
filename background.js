@@ -2,6 +2,47 @@ const CHATGPT_URL    = 'https://chatgpt.com';
 const ALARM_HEARTBEAT = 'heartbeat';
 const ALARM_REMINDER  = 'evening-reminder';
 
+const DEFAULT_PROMPT =
+  "Let's have a 10-minute English conversation practice. " +
+  "Please start by asking me a casual question to get us going.";
+
+const TOPICS = [
+  "Daily life & routine",
+  "Work & career goals",
+  "Travel experiences",
+  "Food & cooking",
+  "News & current events",
+  "Movies, TV & entertainment",
+  "Technology & gadgets",
+  "Health & fitness",
+  "Hobbies & interests",
+  "Culture & traditions",
+  "Future plans & dreams",
+  "Childhood memories",
+  "Books & podcasts",
+  "Environmental issues",
+];
+
+function dayOfYear(dateStr) {
+  const d     = new Date(dateStr);
+  const start = new Date(d.getFullYear(), 0, 0);
+  return Math.floor((d - start) / 86400000);
+}
+
+async function buildChatGptUrl() {
+  const data = await chrome.storage.local.get({ customPrompt: '', topicsEnabled: true });
+  let prompt = data.customPrompt.trim() || DEFAULT_PROMPT;
+
+  if (data.topicsEnabled) {
+    const topic = TOPICS[dayOfYear(todayStr()) % TOPICS.length];
+    prompt += `\n\nToday's topic: ${topic}`;
+  }
+
+  const url = new URL(CHATGPT_URL);
+  url.searchParams.set('q', prompt);
+  return url.toString();
+}
+
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -87,16 +128,8 @@ async function beginSession() {
 
   chrome.notifications.clear('daily-prompt');
 
-  // Reuse existing ChatGPT tab if one is already open
-  const existing = await chrome.tabs.query({ url: 'https://chatgpt.com/*' });
-  let tab;
-  if (existing.length > 0) {
-    tab = existing[0];
-    await chrome.tabs.update(tab.id, { active: true });
-    await chrome.windows.update(tab.windowId, { focused: true });
-  } else {
-    tab = await chrome.tabs.create({ url: CHATGPT_URL, active: true });
-  }
+  const chatUrl = await buildChatGptUrl();
+  const tab = await chrome.tabs.create({ url: chatUrl, active: true });
 
   await chrome.storage.local.set({
     sessionCompleted: false,

@@ -98,6 +98,31 @@ input[type="time"] {
 
 input[type="time"]:focus { border-color: #3b82f6; }
 
+/* ── Prompt textarea ── */
+textarea {
+  width: 100%;
+  padding: 10px 14px;
+  background: #0f1923;
+  color: #e8eaf0;
+  border: 2px solid #2a3a4d;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.15s;
+  font-family: inherit;
+}
+
+textarea:focus { border-color: #3b82f6; }
+
+.hint {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #3a4a5d;
+  line-height: 1.5;
+}
+
 /* ── Toggle ── */
 .toggle-row {
   display: flex;
