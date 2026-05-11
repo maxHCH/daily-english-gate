@@ -25,5 +25,6 @@
   "settingsDuration":   { "message": "練習時長" },
   "settingsReminder":   { "message": "每日提醒時間" },
   "settingsSaved":      { "message": "已儲存 ✓" },
-  "settingsOpen":       { "message": "設定" }
+  "settingsOpen":           { "message": "設定" },
+  "settingsDurationUnit":   { "message": "分鐘（1–60）" }
 }

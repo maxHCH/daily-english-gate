@@ -12,11 +12,9 @@
 
     <section>
       <label class="section-label" data-i18n="settingsDuration"></label>
-      <div id="duration-options" class="seg-group">
-        <button class="seg-btn" data-value="5">5</button>
-        <button class="seg-btn" data-value="10">10</button>
-        <button class="seg-btn" data-value="15">15</button>
-        <button class="seg-btn" data-value="20">20</button>
+      <div class="input-row">
+        <input type="number" id="duration-input" min="1" max="60" value="10">
+        <span data-i18n="settingsDurationUnit"></span>
       </div>
     </section>
 

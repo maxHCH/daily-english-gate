@@ -25,5 +25,6 @@
   "settingsDuration":   { "message": "Practice Duration" },
   "settingsReminder":   { "message": "Daily Reminder" },
   "settingsSaved":      { "message": "Saved ✓" },
-  "settingsOpen":       { "message": "Settings" }
+  "settingsOpen":           { "message": "Settings" },
+  "settingsDurationUnit":   { "message": "min (1–60)" }
 }

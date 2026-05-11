@@ -48,32 +48,38 @@ section {
   margin-bottom: 14px;
 }
 
-/* ── Segmented buttons ── */
-.seg-group {
+/* ── Number input row ── */
+.input-row {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
 }
 
-.seg-btn {
-  flex: 1;
-  padding: 10px 0;
-  background: #0f1923;
+.input-row span {
+  font-size: 15px;
   color: #8892a4;
+}
+
+input[type="number"] {
+  width: 90px;
+  padding: 10px 14px;
+  background: #0f1923;
+  color: #e8eaf0;
   border: 2px solid #2a3a4d;
   border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
+  font-size: 20px;
+  font-weight: 700;
+  outline: none;
+  transition: border-color 0.15s;
+  text-align: center;
+  -moz-appearance: textfield;
 }
 
-.seg-btn:hover { border-color: #3b82f6; color: #e8eaf0; }
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
 
-.seg-btn.active {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  color: #fff;
-}
+input[type="number"]:focus { border-color: #3b82f6; }
+input[type="number"].error { border-color: #ef4444; }
 
 /* ── Time input ── */
 input[type="time"] {
