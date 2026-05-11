@@ -1,0 +1,23 @@
+{
+  "appName":            { "message": "Daily English Gate" },
+  "appDescription":     { "message": "Opens ChatGPT daily and tracks 10 minutes of active practice time" },
+  "labelStreak":        { "message": "Day Streak" },
+  "labelWeekly":        { "message": "This Week" },
+  "targetLabel":        { "message": "/ 10:00 goal" },
+  "btnStart":           { "message": "Start Now" },
+  "btnStarting":        { "message": "Opening..." },
+  "statusNotStarted":   { "message": "Not started today" },
+  "statusInProgress":   { "message": "ChatGPT in use ▶" },
+  "statusPaused":       { "message": "Switch back to ChatGPT to continue" },
+  "statusCompleted":    { "message": "✓ Done for today!" },
+  "notifCompleteTitle": { "message": "Practice Complete!" },
+  "notifCompleteMsg": {
+    "message": "$DAYS$ days in a row — keep it up!",
+    "placeholders": { "days": { "content": "$1" } }
+  },
+  "notifReminderTitle": { "message": "You haven't practiced today!" },
+  "notifReminderMsg": {
+    "message": "Your $DAYS$-day streak is at risk 😢",
+    "placeholders": { "days": { "content": "$1" } }
+  }
+}

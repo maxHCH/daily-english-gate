@@ -8,6 +8,13 @@ const streakVal   = document.getElementById('streak-val');
 const weeklyVal   = document.getElementById('weekly-val');
 const startBtn    = document.getElementById('start-btn');
 
+const i18n = (key, ...subs) => chrome.i18n.getMessage(key, subs);
+
+// Apply static translations once on load
+document.querySelectorAll('[data-i18n]').forEach(el => {
+  el.textContent = i18n(el.dataset.i18n);
+});
+
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -39,11 +46,11 @@ function render(data) {
     timeDisplay.textContent = '0:00';
     setRing(0);
     ringFg.classList.remove('done');
-    statusText.textContent = '今日尚未開始練習';
+    statusText.textContent = i18n('statusNotStarted');
     statusText.className = '';
     startBtn.classList.remove('hidden');
     startBtn.disabled = false;
-    startBtn.textContent = '立即開始';
+    startBtn.textContent = i18n('btnStart');
     return;
   }
 
@@ -53,7 +60,7 @@ function render(data) {
     timeDisplay.textContent = '10:00';
     setRing(1);
     ringFg.classList.add('done');
-    statusText.textContent = '✓ 今日練習已完成！';
+    statusText.textContent = i18n('statusCompleted');
     statusText.className = 'done';
     return;
   }
@@ -65,10 +72,10 @@ function render(data) {
   setRing(activeSecs / TOTAL_SECS);
 
   if (data.activeStart) {
-    statusText.textContent = 'ChatGPT 使用中 ▶';
+    statusText.textContent = i18n('statusInProgress');
     statusText.className = 'active';
   } else {
-    statusText.textContent = '切換到 ChatGPT 分頁繼續';
+    statusText.textContent = i18n('statusPaused');
     statusText.className = 'paused';
   }
 }
@@ -88,6 +95,6 @@ refresh();
 
 startBtn.addEventListener('click', () => {
   startBtn.disabled = true;
-  startBtn.textContent = '開啟中...';
+  startBtn.textContent = i18n('btnStarting');
   chrome.runtime.sendMessage({ action: 'startNow' }, () => setTimeout(refresh, 400));
 });

@@ -70,8 +70,8 @@ async function completeSession(data) {
   chrome.notifications.create('complete', {
     type: 'basic',
     iconUrl: 'icons/icon48.png',
-    title: '英語練習完成！',
-    message: `連續 ${streak} 天，繼續保持！`,
+    title: chrome.i18n.getMessage('notifCompleteTitle'),
+    message: chrome.i18n.getMessage('notifCompleteMsg', String(streak)),
   });
   updateBadge();
 }
@@ -191,8 +191,8 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     chrome.notifications.create('reminder', {
       type: 'basic',
       iconUrl: 'icons/icon48.png',
-      title: '今天還沒練習英文！',
-      message: `連續 ${data.streak || 0} 天的紀錄快斷掉了 😢`,
+      title: chrome.i18n.getMessage('notifReminderTitle'),
+      message: chrome.i18n.getMessage('notifReminderMsg', String(data.streak || 0)),
     });
   }
 });
